@@ -1,27 +1,12 @@
-import { neon } from "@neondatabase/serverless"
+import { sql } from "@vercel/postgres"
 
-let sql: any
 let isInitialized = false
 
-// Initialize database connection only when needed
-async function initializeDatabase() {
-  if (!sql) {
-    const databaseUrl = process.env.DATABASE_URL
-    if (!databaseUrl) {
-      throw new Error("DATABASE_URL environment variable is not set")
-    }
-    sql = neon(databaseUrl)
+export async function initializeDatabase() {
+  if (isInitialized) {
+    return
   }
 
-  if (!isInitialized) {
-    await ensureSchema()
-    isInitialized = true
-  }
-
-  return sql
-}
-
-async function ensureSchema() {
   try {
     console.log("[v0] Checking database schema...")
 
@@ -34,13 +19,27 @@ async function ensureSchema() {
       );
     `
 
-    const tablesExist = result[0]?.exists
+    const tablesExist = result.rows[0].exists
 
     if (!tablesExist) {
       console.log("[v0] Tables do not exist. Creating schema...")
 
-      // Create categories table first (referenced by others)
+      // Create tables
       await sql`
+        -- Products table
+        CREATE TABLE products (
+          id SERIAL PRIMARY KEY,
+          sku VARCHAR(100) UNIQUE NOT NULL,
+          name VARCHAR(255) NOT NULL,
+          category_id INTEGER,
+          barcode VARCHAR(100),
+          description TEXT,
+          image_url VARCHAR(500),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Categories table
         CREATE TABLE categories (
           id SERIAL PRIMARY KEY,
           name VARCHAR(255) NOT NULL UNIQUE,
@@ -48,10 +47,19 @@ async function ensureSchema() {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-      `
 
-      // Create employees table
-      await sql`
+        -- Evaluation criteria table
+        CREATE TABLE criteria (
+          id SERIAL PRIMARY KEY,
+          category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+          name VARCHAR(255) NOT NULL,
+          weight DECIMAL(3, 2),
+          max_score INTEGER DEFAULT 10,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(category_id, name)
+        );
+
+        -- Employees table
         CREATE TABLE employees (
           id SERIAL PRIMARY KEY,
           email VARCHAR(255) UNIQUE NOT NULL,
@@ -63,40 +71,8 @@ async function ensureSchema() {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-      `
 
-      // Create products table
-      await sql`
-        CREATE TABLE products (
-          id SERIAL PRIMARY KEY,
-          sku VARCHAR(100) UNIQUE NOT NULL,
-          name VARCHAR(255) NOT NULL,
-          category_id INTEGER,
-          barcode VARCHAR(100),
-          description TEXT,
-          image_url VARCHAR(500),
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          CONSTRAINT fk_products_category FOREIGN KEY (category_id) 
-            REFERENCES categories(id) ON DELETE SET NULL
-        );
-      `
-
-      // Create criteria table
-      await sql`
-        CREATE TABLE criteria (
-          id SERIAL PRIMARY KEY,
-          category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
-          name VARCHAR(255) NOT NULL,
-          weight DECIMAL(3, 2),
-          max_score INTEGER DEFAULT 10,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          UNIQUE(category_id, name)
-        );
-      `
-
-      // Create evaluations table
-      await sql`
+        -- Evaluations table
         CREATE TABLE evaluations (
           id SERIAL PRIMARY KEY,
           product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
@@ -109,10 +85,8 @@ async function ensureSchema() {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-      `
 
-      // Create evaluation_scores table
-      await sql`
+        -- Evaluation scores table
         CREATE TABLE evaluation_scores (
           id SERIAL PRIMARY KEY,
           evaluation_id INTEGER NOT NULL REFERENCES evaluations(id) ON DELETE CASCADE,
@@ -123,18 +97,35 @@ async function ensureSchema() {
         );
       `
 
-      // Create indexes for performance
-      await sql`CREATE INDEX idx_products_sku ON products(sku)`
-      await sql`CREATE INDEX idx_products_category ON products(category_id)`
-      await sql`CREATE INDEX idx_evaluations_product ON evaluations(product_id)`
-      await sql`CREATE INDEX idx_evaluations_employee ON evaluations(employee_id)`
-      await sql`CREATE INDEX idx_evaluations_date ON evaluations(evaluation_date)`
-      await sql`CREATE INDEX idx_evaluation_scores_evaluation ON evaluation_scores(evaluation_id)`
+      // Add foreign key
+      await sql`
+        ALTER TABLE products ADD CONSTRAINT fk_products_category 
+        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL;
+      `
+
+      // Create indexes
+      await sql`
+        CREATE INDEX idx_products_sku ON products(sku);
+        CREATE INDEX idx_products_category ON products(category_id);
+        CREATE INDEX idx_evaluations_product ON evaluations(product_id);
+        CREATE INDEX idx_evaluations_employee ON evaluations(employee_id);
+        CREATE INDEX idx_evaluations_date ON evaluations(evaluation_date);
+        CREATE INDEX idx_evaluation_scores_evaluation ON evaluation_scores(evaluation_id);
+      `
 
       console.log("[v0] Schema created successfully!")
 
-      // Seed initial data
+      // Seed data
       console.log("[v0] Seeding initial data...")
+
+      // Seed employees
+      await sql`
+        INSERT INTO employees (email, name, role, store_location, password_hash, is_active) VALUES
+        ('operator@store.com', 'John Smith', 'operator', 'Store A', 'demo', true),
+        ('operator2@store.com', 'Maria Garcia', 'operator', 'Store B', 'demo', true),
+        ('manager@store.com', 'David Johnson', 'manager', 'Store A', 'demo', true),
+        ('admin@store.com', 'Alice Brown', 'admin', 'Headquarters', 'demo', true);
+      `
 
       // Seed categories
       await sql`
@@ -149,15 +140,7 @@ async function ensureSchema() {
         ('Toys & Games', 'Toys and gaming products'),
         ('Automotive', 'Car parts and accessories'),
         ('Miscellaneous', 'Other products')
-      `
-
-      // Seed employees
-      await sql`
-        INSERT INTO employees (email, name, role, store_location, password_hash, is_active) VALUES
-        ('operator@store.com', 'John Smith', 'operator', 'Store A', 'demo', true),
-        ('operator2@store.com', 'Maria Garcia', 'operator', 'Store B', 'demo', true),
-        ('manager@store.com', 'David Johnson', 'manager', 'Store A', 'demo', true),
-        ('admin@store.com', 'Alice Brown', 'admin', 'Headquarters', 'demo', true)
+        ON CONFLICT DO NOTHING;
       `
 
       // Seed criteria for each category
@@ -184,7 +167,7 @@ async function ensureSchema() {
         UNION ALL SELECT id, 'Effectiveness', 1.4, 10 FROM categories WHERE name = 'Health & Beauty'
         UNION ALL SELECT id, 'Ingredients', 1.1, 10 FROM categories WHERE name = 'Health & Beauty'
         UNION ALL SELECT id, 'Fun Factor', 1.4, 10 FROM categories WHERE name = 'Toys & Games'
-        UNION ALL SELECT id, 'Safety', 1.3, 10 FROM categories WHERE name = 'Toys & Games'
+        UNION ALL SELECT id, 'Safety', 1.3, 10 FROM categories WHERE name = 'Toys & Games';
       `
 
       // Seed products
@@ -197,53 +180,17 @@ async function ensureSchema() {
         ('FOOD-001', 'Organic Coffee Beans 500g', 6, '123456789016', 'Fair-trade organic coffee'),
         ('FOOD-002', 'Almond Butter', 6, '123456789017', 'Natural almond butter no sugar'),
         ('GARDEN-001', 'Potting Soil 10L', 3, '123456789018', 'Premium potting mix for plants'),
-        ('GARDEN-002', 'Garden Gloves', 3, '123456789019', 'Durable waterproof garden gloves')
+        ('GARDEN-002', 'Garden Gloves', 3, '123456789019', 'Durable waterproof garden gloves');
       `
 
       console.log("[v0] Database initialized successfully!")
     } else {
       console.log("[v0] Database schema already exists.")
     }
+
+    isInitialized = true
   } catch (error) {
     console.error("[v0] Database initialization error:", error)
-    throw error
-  }
-}
-
-export { initializeDatabase, sql as getSql }
-
-// Helper function for querying with parametrized queries
-export async function query<T>(text: string, values?: (string | number | boolean | null)[]): Promise<T[]> {
-  try {
-    const sqlClient = await initializeDatabase()
-
-    console.log("[v0] Executing query:", text)
-    console.log("[v0] With values:", values)
-
-    let result: any
-
-    if (values && values.length > 0) {
-      // For queries with parameters, use sql.query()
-      result = await sqlClient.query(text, values)
-    } else {
-      // For queries without parameters, use tagged template literal
-      result = await sqlClient`${sqlClient.unsafe(text)}`
-    }
-
-    console.log("[v0] Raw database result:", result)
-
-    // Handle different response formats from Neon
-    if (Array.isArray(result)) {
-      return result as T[]
-    } else if (result && Array.isArray(result.rows)) {
-      return result.rows as T[]
-    } else if (result && typeof result === "object") {
-      return [result] as T[]
-    }
-
-    return [] as T[]
-  } catch (error) {
-    console.error("Database error:", error)
     throw error
   }
 }

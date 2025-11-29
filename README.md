@@ -25,17 +25,28 @@
    \`\`\`
    This will start a PostgreSQL database on `localhost:5432` with database name `trabalho_database`.
 
-3. **Install dependencies**
+3. **Run database migrations**
+   \`\`\`bash
+   # Connect to the database and run the migration scripts
+   docker exec -i trabalho_db psql -U postgres -d trabalho_database < scripts/01-init-schema.sql
+   docker exec -i trabalho_db psql -U postgres -d trabalho_database < scripts/02-seed-employees.sql
+   docker exec -i trabalho_db psql -U postgres -d trabalho_database < scripts/03-seed-criteria.sql
+   docker exec -i trabalho_db psql -U postgres -d trabalho_database < scripts/seed-categories.sql
+   \`\`\`
+   
+   **Alternative:** Use a database client like DBeaver, pgAdmin, or psql to connect to `localhost:5432` and manually run the SQL scripts in order.
+
+4. **Install dependencies**
    \`\`\`bash
    npm install
    \`\`\`
 
-4. **Run the development server**
+5. **Run the development server**
    \`\`\`bash
    npm run dev
    \`\`\`
 
-5. **Open your browser**
+6. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
 ### Environment Variables
@@ -45,6 +56,14 @@ The `.env` file is included in the repository with local development defaults. N
 - `DATABASE_URL`: Points to the local Docker PostgreSQL database
 - `JWT_SECRET`: Used for authentication (change in production)
 - `NEXT_PUBLIC_BASE44_API_URL`: Base44 API endpoint
+
+### Database Connection Details
+
+- **Host:** localhost
+- **Port:** 5432
+- **Database:** trabalho_database
+- **Username:** postgres
+- **Password:** postgres
 
 ### Stopping the Database
 
@@ -75,6 +94,3 @@ Continue building your app on:
 2. Deploy your chats from the v0 interface
 3. Changes are automatically pushed to this repository
 4. Vercel deploys the latest version from this repository
-\`\`\`
-
-```gitignore file="" isHidden
