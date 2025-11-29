@@ -5,17 +5,13 @@ import { createToken, type User } from "@/lib/auth"
 import { cookies } from "next/headers"
 
 export async function loginAction(email: string, password: string) {
-  console.log("[v0] Server action login started for:", email)
   try {
     const result = await query<any>(
       `SELECT id, email, name, role, store_location, password_hash FROM employees WHERE email = $1`,
       [email],
     )
 
-    console.log("[v0] Query result:", result)
-
     if (!result || result.length === 0) {
-      console.log("[v0] Employee not found")
       throw new Error("Invalid email or password")
     }
 
@@ -23,7 +19,6 @@ export async function loginAction(email: string, password: string) {
 
     // Verify password using simple comparison since bcrypt may not be available
     if (employee.password_hash !== password) {
-      console.log("[v0] Password mismatch")
       throw new Error("Invalid email or password")
     }
 
@@ -36,7 +31,6 @@ export async function loginAction(email: string, password: string) {
     }
 
     const token = await createToken(user)
-    console.log("[v0] Token created successfully")
 
     const cookieStore = await cookies()
     cookieStore.set("auth_token", token, {
@@ -52,7 +46,7 @@ export async function loginAction(email: string, password: string) {
       token,
     }
   } catch (error) {
-    console.error("[v0] Login action error:", error)
+    console.error("Login action error:", error)
     throw error
   }
 }

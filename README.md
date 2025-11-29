@@ -1,9 +1,6 @@
-# productclassificationpwa11
+# Product Classification PWA
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
-
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/joaoquiteteprestserv-1817s-projects/v0-productclassificationpwa11-hg)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/7mLdF7HfXnh)
+A Progressive Web App for product evaluation and classification with offline support.
 
 ## Quick Start for Developers
 
@@ -25,28 +22,18 @@
    \`\`\`
    This will start a PostgreSQL database on `localhost:5432` with database name `trabalho_database`.
 
-3. **Run database migrations**
-   \`\`\`bash
-   # Connect to the database and run the migration scripts
-   docker exec -i trabalho_db psql -U postgres -d trabalho_database < scripts/01-init-schema.sql
-   docker exec -i trabalho_db psql -U postgres -d trabalho_database < scripts/02-seed-employees.sql
-   docker exec -i trabalho_db psql -U postgres -d trabalho_database < scripts/03-seed-criteria.sql
-   docker exec -i trabalho_db psql -U postgres -d trabalho_database < scripts/seed-categories.sql
-   \`\`\`
-   
-   **Alternative:** Use a database client like DBeaver, pgAdmin, or psql to connect to `localhost:5432` and manually run the SQL scripts in order.
-
-4. **Install dependencies**
+3. **Install dependencies**
    \`\`\`bash
    npm install
    \`\`\`
 
-5. **Run the development server**
+4. **Run the development server**
    \`\`\`bash
    npm run dev
    \`\`\`
+   The database will automatically initialize with tables and seed data on first connection.
 
-6. **Open your browser**
+5. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
 ### Environment Variables
@@ -76,21 +63,10 @@ To remove the database volume as well:
 docker-compose down -v
 \`\`\`
 
-## Deployment
+## Features
 
-Your project is live at:
-
-**[https://vercel.com/joaoquiteteprestserv-1817s-projects/v0-productclassificationpwa11-hg](https://vercel.com/joaoquiteteprestserv-1817s-projects/v0-productclassificationpwa11-hg)**
-
-## Build your app
-
-Continue building your app on:
-
-**[https://v0.app/chat/7mLdF7HfXnh](https://v0.app/chat/7mLdF7HfXnh)**
-
-## How It Works
-
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+- Product evaluation and classification
+- Offline support with service workers
+- Role-based access control (operator, manager, admin)
+- Category-based evaluation criteria
+- Progressive Web App with installable interface

@@ -8,7 +8,7 @@ export async function initializeDatabase() {
   }
 
   try {
-    console.log("[v0] Checking database schema...")
+    console.log("Checking database schema...")
 
     // Check if tables exist
     const result = await sql`
@@ -22,7 +22,7 @@ export async function initializeDatabase() {
     const tablesExist = result.rows[0].exists
 
     if (!tablesExist) {
-      console.log("[v0] Tables do not exist. Creating schema...")
+      console.log("Tables do not exist. Creating schema...")
 
       // Create tables
       await sql`
@@ -113,10 +113,10 @@ export async function initializeDatabase() {
         CREATE INDEX idx_evaluation_scores_evaluation ON evaluation_scores(evaluation_id);
       `
 
-      console.log("[v0] Schema created successfully!")
+      console.log("Schema created successfully!")
 
       // Seed data
-      console.log("[v0] Seeding initial data...")
+      console.log("Seeding initial data...")
 
       // Seed employees
       await sql`
@@ -183,14 +183,14 @@ export async function initializeDatabase() {
         ('GARDEN-002', 'Garden Gloves', 3, '123456789019', 'Durable waterproof garden gloves');
       `
 
-      console.log("[v0] Database initialized successfully!")
+      console.log("Database initialized successfully!")
     } else {
-      console.log("[v0] Database schema already exists.")
+      console.log("Database schema already exists.")
     }
 
     isInitialized = true
   } catch (error) {
-    console.error("[v0] Database initialization error:", error)
+    console.error("Database initialization error:", error)
     throw error
   }
 }

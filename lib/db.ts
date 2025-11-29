@@ -23,7 +23,7 @@ async function initializeDatabase() {
 
 async function ensureSchema() {
   try {
-    console.log("[v0] Checking database schema...")
+    console.log("Checking database schema...")
 
     // Check if tables exist
     const result = await sql`
@@ -37,7 +37,7 @@ async function ensureSchema() {
     const tablesExist = result[0]?.exists
 
     if (!tablesExist) {
-      console.log("[v0] Tables do not exist. Creating schema...")
+      console.log("Tables do not exist. Creating schema...")
 
       // Create categories table first (referenced by others)
       await sql`
@@ -131,10 +131,10 @@ async function ensureSchema() {
       await sql`CREATE INDEX idx_evaluations_date ON evaluations(evaluation_date)`
       await sql`CREATE INDEX idx_evaluation_scores_evaluation ON evaluation_scores(evaluation_id)`
 
-      console.log("[v0] Schema created successfully!")
+      console.log("Schema created successfully!")
 
       // Seed initial data
-      console.log("[v0] Seeding initial data...")
+      console.log("Seeding initial data...")
 
       // Seed categories
       await sql`
@@ -200,12 +200,12 @@ async function ensureSchema() {
         ('GARDEN-002', 'Garden Gloves', 3, '123456789019', 'Durable waterproof garden gloves')
       `
 
-      console.log("[v0] Database initialized successfully!")
+      console.log("Database initialized successfully!")
     } else {
-      console.log("[v0] Database schema already exists.")
+      console.log("Database schema already exists.")
     }
   } catch (error) {
-    console.error("[v0] Database initialization error:", error)
+    console.error("Database initialization error:", error)
     throw error
   }
 }
@@ -217,9 +217,6 @@ export async function query<T>(text: string, values?: (string | number | boolean
   try {
     const sqlClient = await initializeDatabase()
 
-    console.log("[v0] Executing query:", text)
-    console.log("[v0] With values:", values)
-
     let result: any
 
     if (values && values.length > 0) {
@@ -230,9 +227,6 @@ export async function query<T>(text: string, values?: (string | number | boolean
       result = await sqlClient`${sqlClient.unsafe(text)}`
     }
 
-    console.log("[v0] Raw database result:", result)
-
-    // Handle different response formats from Neon
     if (Array.isArray(result)) {
       return result as T[]
     } else if (result && Array.isArray(result.rows)) {
