@@ -40,25 +40,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const login = async (email: string, password: string) => {
-    console.log("[v0] Auth context login started")
     setLoading(true)
     try {
-      console.log("[v0] Calling loginAction server action")
       const { loginAction } = await import("@/app/actions/auth")
       const result = await loginAction(email, password)
-      console.log("[v0] Login result received:", result)
       setUser(result.user)
       localStorage.setItem("user", JSON.stringify(result.user))
       localStorage.setItem("auth_token", result.token)
 
       // This ensures it's sent with fetch requests to API routes
       document.cookie = `auth_token=${result.token}; path=/; max-age=${60 * 60 * 24 * 7}; samesite=lax`
-      console.log("[v0] Auth cookie set on client")
 
-      console.log("[v0] Redirecting to /home")
       router.push("/home")
     } catch (error) {
-      console.error("[v0] Login catch error:", error)
+      console.error("Login error:", error)
       throw error
     } finally {
       setLoading(false)

@@ -17,13 +17,10 @@ function getToken(request: NextRequest): string | undefined {
 
 export async function GET(request: NextRequest) {
   try {
-    console.log("[v0] Categories API called")
-    console.log("[v0] Querying categories from database...")
     const categories = await query<Category>("SELECT * FROM categories ORDER BY name ASC")
-    console.log("[v0] Categories found:", categories.length, categories)
     return NextResponse.json(categories)
   } catch (error) {
-    console.error("[v0] Error fetching categories:", error)
+    console.error("Error fetching categories:", error)
     return NextResponse.json({ error: "Failed to fetch categories" }, { status: 500 })
   }
 }
@@ -52,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(categories[0], { status: 201 })
   } catch (error) {
-    console.error("[v0] Error creating category:", error)
+    console.error("Error creating category:", error)
     return NextResponse.json({ error: "Failed to create category" }, { status: 500 })
   }
 }

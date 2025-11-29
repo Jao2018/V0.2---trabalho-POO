@@ -1,16 +1,19 @@
-import { neon } from "@neondatabase/serverless"
+import { Pool } from "pg"
 
-let sql: any
+let pool: Pool | null = null
 let isInitialized = false
 
 // Initialize database connection only when needed
 async function initializeDatabase() {
-  if (!sql) {
+  if (!pool) {
     const databaseUrl = process.env.DATABASE_URL
     if (!databaseUrl) {
       throw new Error("DATABASE_URL environment variable is not set")
     }
-    sql = neon(databaseUrl)
+
+    pool = new Pool({
+      connectionString: databaseUrl,
+    })
   }
 
   if (!isInitialized) {
@@ -18,7 +21,7 @@ async function initializeDatabase() {
     isInitialized = true
   }
 
-  return sql
+  return pool
 }
 
 async function ensureSchema() {
@@ -26,21 +29,21 @@ async function ensureSchema() {
     console.log("Checking database schema...")
 
     // Check if tables exist
-    const result = await sql`
+    const result = await pool!.query(`
       SELECT EXISTS (
         SELECT FROM information_schema.tables 
         WHERE table_schema = 'public' 
         AND table_name = 'products'
       );
-    `
+    `)
 
-    const tablesExist = result[0]?.exists
+    const tablesExist = result.rows[0]?.exists
 
     if (!tablesExist) {
       console.log("Tables do not exist. Creating schema...")
 
       // Create categories table first (referenced by others)
-      await sql`
+      await pool!.query(`
         CREATE TABLE categories (
           id SERIAL PRIMARY KEY,
           name VARCHAR(255) NOT NULL UNIQUE,
@@ -48,10 +51,10 @@ async function ensureSchema() {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-      `
+      `)
 
       // Create employees table
-      await sql`
+      await pool!.query(`
         CREATE TABLE employees (
           id SERIAL PRIMARY KEY,
           email VARCHAR(255) UNIQUE NOT NULL,
@@ -63,10 +66,10 @@ async function ensureSchema() {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-      `
+      `)
 
       // Create products table
-      await sql`
+      await pool!.query(`
         CREATE TABLE products (
           id SERIAL PRIMARY KEY,
           sku VARCHAR(100) UNIQUE NOT NULL,
@@ -80,10 +83,10 @@ async function ensureSchema() {
           CONSTRAINT fk_products_category FOREIGN KEY (category_id) 
             REFERENCES categories(id) ON DELETE SET NULL
         );
-      `
+      `)
 
       // Create criteria table
-      await sql`
+      await pool!.query(`
         CREATE TABLE criteria (
           id SERIAL PRIMARY KEY,
           category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
@@ -93,10 +96,10 @@ async function ensureSchema() {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           UNIQUE(category_id, name)
         );
-      `
+      `)
 
       // Create evaluations table
-      await sql`
+      await pool!.query(`
         CREATE TABLE evaluations (
           id SERIAL PRIMARY KEY,
           product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
@@ -109,10 +112,10 @@ async function ensureSchema() {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-      `
+      `)
 
       // Create evaluation_scores table
-      await sql`
+      await pool!.query(`
         CREATE TABLE evaluation_scores (
           id SERIAL PRIMARY KEY,
           evaluation_id INTEGER NOT NULL REFERENCES evaluations(id) ON DELETE CASCADE,
@@ -121,15 +124,15 @@ async function ensureSchema() {
           comment TEXT,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-      `
+      `)
 
       // Create indexes for performance
-      await sql`CREATE INDEX idx_products_sku ON products(sku)`
-      await sql`CREATE INDEX idx_products_category ON products(category_id)`
-      await sql`CREATE INDEX idx_evaluations_product ON evaluations(product_id)`
-      await sql`CREATE INDEX idx_evaluations_employee ON evaluations(employee_id)`
-      await sql`CREATE INDEX idx_evaluations_date ON evaluations(evaluation_date)`
-      await sql`CREATE INDEX idx_evaluation_scores_evaluation ON evaluation_scores(evaluation_id)`
+      await pool!.query(`CREATE INDEX idx_products_sku ON products(sku)`)
+      await pool!.query(`CREATE INDEX idx_products_category ON products(category_id)`)
+      await pool!.query(`CREATE INDEX idx_evaluations_product ON evaluations(product_id)`)
+      await pool!.query(`CREATE INDEX idx_evaluations_employee ON evaluations(employee_id)`)
+      await pool!.query(`CREATE INDEX idx_evaluations_date ON evaluations(evaluation_date)`)
+      await pool!.query(`CREATE INDEX idx_evaluation_scores_evaluation ON evaluation_scores(evaluation_id)`)
 
       console.log("Schema created successfully!")
 
@@ -137,7 +140,7 @@ async function ensureSchema() {
       console.log("Seeding initial data...")
 
       // Seed categories
-      await sql`
+      await pool!.query(`
         INSERT INTO categories (name, description) VALUES
         ('Electronics', 'Electronic devices and gadgets'),
         ('Clothing', 'Apparel and fashion items'),
@@ -149,19 +152,19 @@ async function ensureSchema() {
         ('Toys & Games', 'Toys and gaming products'),
         ('Automotive', 'Car parts and accessories'),
         ('Miscellaneous', 'Other products')
-      `
+      `)
 
       // Seed employees
-      await sql`
+      await pool!.query(`
         INSERT INTO employees (email, name, role, store_location, password_hash, is_active) VALUES
         ('operator@store.com', 'John Smith', 'operator', 'Store A', 'demo', true),
         ('operator2@store.com', 'Maria Garcia', 'operator', 'Store B', 'demo', true),
         ('manager@store.com', 'David Johnson', 'manager', 'Store A', 'demo', true),
         ('admin@store.com', 'Alice Brown', 'admin', 'Headquarters', 'demo', true)
-      `
+      `)
 
       // Seed criteria for each category
-      await sql`
+      await pool!.query(`
         INSERT INTO criteria (category_id, name, weight, max_score)
         SELECT id, 'Build Quality', 1.0, 10 FROM categories WHERE name = 'Electronics'
         UNION ALL SELECT id, 'Functionality', 1.2, 10 FROM categories WHERE name = 'Electronics'
@@ -185,10 +188,10 @@ async function ensureSchema() {
         UNION ALL SELECT id, 'Ingredients', 1.1, 10 FROM categories WHERE name = 'Health & Beauty'
         UNION ALL SELECT id, 'Fun Factor', 1.4, 10 FROM categories WHERE name = 'Toys & Games'
         UNION ALL SELECT id, 'Safety', 1.3, 10 FROM categories WHERE name = 'Toys & Games'
-      `
+      `)
 
       // Seed products
-      await sql`
+      await pool!.query(`
         INSERT INTO products (sku, name, category_id, barcode, description) VALUES
         ('ELEC-001', 'Wireless Headphones', 1, '123456789012', 'Premium noise-cancelling headphones'),
         ('ELEC-002', 'USB-C Cable 2m', 1, '123456789013', 'High-speed USB-C charging cable'),
@@ -198,7 +201,7 @@ async function ensureSchema() {
         ('FOOD-002', 'Almond Butter', 6, '123456789017', 'Natural almond butter no sugar'),
         ('GARDEN-001', 'Potting Soil 10L', 3, '123456789018', 'Premium potting mix for plants'),
         ('GARDEN-002', 'Garden Gloves', 3, '123456789019', 'Durable waterproof garden gloves')
-      `
+      `)
 
       console.log("Database initialized successfully!")
     } else {
@@ -210,32 +213,14 @@ async function ensureSchema() {
   }
 }
 
-export { initializeDatabase, sql as getSql }
+export { initializeDatabase, pool as getPool }
 
-// Helper function for querying with parametrized queries
+// Helper function for querying with parameterized queries
 export async function query<T>(text: string, values?: (string | number | boolean | null)[]): Promise<T[]> {
   try {
-    const sqlClient = await initializeDatabase()
-
-    let result: any
-
-    if (values && values.length > 0) {
-      // For queries with parameters, use sql.query()
-      result = await sqlClient.query(text, values)
-    } else {
-      // For queries without parameters, use tagged template literal
-      result = await sqlClient`${sqlClient.unsafe(text)}`
-    }
-
-    if (Array.isArray(result)) {
-      return result as T[]
-    } else if (result && Array.isArray(result.rows)) {
-      return result.rows as T[]
-    } else if (result && typeof result === "object") {
-      return [result] as T[]
-    }
-
-    return [] as T[]
+    const poolClient = await initializeDatabase()
+    const result = await poolClient.query(text, values || [])
+    return result.rows as T[]
   } catch (error) {
     console.error("Database error:", error)
     throw error

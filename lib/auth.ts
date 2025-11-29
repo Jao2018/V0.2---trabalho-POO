@@ -76,10 +76,8 @@ export async function createToken(user: User): Promise<string> {
 
 export async function verifyToken(token: string): Promise<User | null> {
   try {
-    console.log("[v0] Verifying token:", token?.substring(0, 20) + "...")
     const [header, payload, signature] = token.split(".")
     if (!header || !payload || !signature) {
-      console.log("[v0] Token parts missing")
       return null
     }
 
@@ -99,9 +97,7 @@ export async function verifyToken(token: string): Promise<User | null> {
     // Use verify to check the signature
     const isValid = await crypto.subtle.verify("HMAC", secretKey, signatureBytes, encoder.encode(message))
 
-    console.log("[v0] Signature valid:", isValid)
     if (!isValid) {
-      console.log("[v0] Signature verification failed")
       return null
     }
 
@@ -109,14 +105,12 @@ export async function verifyToken(token: string): Promise<User | null> {
 
     const now = Math.floor(Date.now() / 1000)
     if (decodedPayload.exp < now) {
-      console.log("[v0] Token expired")
       return null
     }
 
-    console.log("[v0] Token verified successfully")
     return decodedPayload as User
   } catch (error) {
-    console.error("[v0] Token verification error:", error)
+    console.error("Token verification error:", error)
     return null
   }
 }
