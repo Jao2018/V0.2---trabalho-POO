@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem("user", JSON.stringify(result.user))
       localStorage.setItem("auth_token", result.token)
 
-      // This ensures it's sent with fetch requests to API routes
+      // Isso garante que seja enviado com requisições fetch para rotas da API
       document.cookie = `auth_token=${result.token}; path=/; max-age=${60 * 60 * 24 * 7}; samesite=lax`
 
       router.push("/home")

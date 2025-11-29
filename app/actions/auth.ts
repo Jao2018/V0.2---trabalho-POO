@@ -17,7 +17,7 @@ export async function loginAction(email: string, password: string) {
 
     const employee = result[0]
 
-    // Verify password using simple comparison since bcrypt may not be available
+    // Verificar senha usando comparação simples já que bcrypt pode não estar disponível
     if (employee.password_hash !== password) {
       throw new Error("Invalid email or password")
     }

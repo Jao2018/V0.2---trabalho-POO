@@ -1,4 +1,4 @@
-// IndexedDB for offline storage
+// IndexedDB para armazenamento offline
 export interface OfflineEvaluation {
   id?: number
   product_id: number
@@ -29,14 +29,14 @@ export async function initOfflineDB(): Promise<IDBDatabase> {
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result
 
-      // Store for pending evaluations
+      // Store para avaliações pendentes
       if (!db.objectStoreNames.contains(EVALUATIONS_STORE)) {
         const store = db.createObjectStore(EVALUATIONS_STORE, { keyPath: "id", autoIncrement: true })
         store.createIndex("synced", "synced", { unique: false })
         store.createIndex("created_at", "created_at", { unique: false })
       }
 
-      // Store for cached data
+      // Store para dados em cache
       if (!db.objectStoreNames.contains(CACHE_STORE)) {
         const store = db.createObjectStore(CACHE_STORE, { keyPath: "key", autoIncrement: false })
         store.createIndex("timestamp", "timestamp", { unique: false })
@@ -69,14 +69,14 @@ export async function getPendingEvaluations(): Promise<OfflineEvaluation[]> {
 
       request.onerror = () => reject(request.error)
       request.onsuccess = () => {
-        // Filter for unsynced evaluations in JavaScript instead
+        // Filtrar avaliações não sincronizadas em JavaScript
         const allEvaluations = request.result as OfflineEvaluation[]
         const unsyncedEvaluations = allEvaluations.filter((evaluation) => !evaluation.synced)
         resolve(unsyncedEvaluations)
       }
     } catch (error) {
-      console.error("[v0] Error in getPendingEvaluations:", error)
-      resolve([]) // Return empty array on error to prevent crashes
+      console.error("Erro em getPendingEvaluations:", error)
+      resolve([]) // Retornar array vazio em caso de erro para prevenir crashes
     }
   })
 }

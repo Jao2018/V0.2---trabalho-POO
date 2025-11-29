@@ -4,7 +4,7 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get("auth_token")?.value
   const { pathname } = request.nextUrl
 
-  // Allow login page without token
+  // Permitir página de login sem token
   if (pathname === "/login") {
     if (token) {
       return NextResponse.redirect(new URL("/home", request.url))
@@ -12,7 +12,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Protect all other routes
+  // Proteger todas as outras rotas
   if (!token) {
     return NextResponse.redirect(new URL("/login", request.url))
   }

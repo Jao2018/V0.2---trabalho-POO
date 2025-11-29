@@ -8,7 +8,7 @@ export interface User {
   store_location: string
 }
 
-// Helper function to convert string to base64url
+// Função auxiliar para converter string para base64url
 function base64url(input: string | ArrayBuffer): string {
   let binary: string
   if (input instanceof ArrayBuffer) {
@@ -20,15 +20,15 @@ function base64url(input: string | ArrayBuffer): string {
 }
 
 function base64urlToBytes(input: string): Uint8Array {
-  // Convert base64url to base64
+  // Converter base64url para base64
   let base64 = input.replace(/-/g, "+").replace(/_/g, "/")
-  // Add padding
+  // Adicionar padding
   const padding = (4 - (base64.length % 4)) % 4
   base64 += "=".repeat(padding)
 
-  // Decode base64 to binary string
+  // Decodificar base64 para string binária
   const binaryString = atob(base64)
-  // Convert binary string to Uint8Array
+  // Converter string binária para Uint8Array
   const bytes = new Uint8Array(binaryString.length)
   for (let i = 0; i < binaryString.length; i++) {
     bytes[i] = binaryString.charCodeAt(i)
@@ -58,7 +58,7 @@ export async function createToken(user: User): Promise<string> {
 
   const message = `${header}.${payload}`
 
-  // Use Web Crypto API
+  // Usar Web Crypto API
   const encoder = new TextEncoder()
   const secretKey = await crypto.subtle.importKey(
     "raw",
@@ -94,7 +94,7 @@ export async function verifyToken(token: string): Promise<User | null> {
 
     const signatureBytes = base64urlToBytes(signature)
 
-    // Use verify to check the signature
+    // Usar verify para verificar a assinatura
     const isValid = await crypto.subtle.verify("HMAC", secretKey, signatureBytes, encoder.encode(message))
 
     if (!isValid) {

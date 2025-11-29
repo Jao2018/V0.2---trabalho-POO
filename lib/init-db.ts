@@ -8,9 +8,9 @@ export async function initializeDatabase() {
   }
 
   try {
-    console.log("Checking database schema...")
+    console.log("Verificando schema do banco de dados...")
 
-    // Check if tables exist
+    // Verificar se as tabelas existem
     const result = await sql`
       SELECT EXISTS (
         SELECT FROM information_schema.tables 
@@ -22,9 +22,9 @@ export async function initializeDatabase() {
     const tablesExist = result.rows[0].exists
 
     if (!tablesExist) {
-      console.log("Tables do not exist. Creating schema...")
+      console.log("Tabelas não existem. Criando schema...")
 
-      // Create tables
+      // Criar tabelas
       await sql`
         -- Products table
         CREATE TABLE products (
@@ -97,13 +97,13 @@ export async function initializeDatabase() {
         );
       `
 
-      // Add foreign key
+      // Adicionar chave estrangeira
       await sql`
         ALTER TABLE products ADD CONSTRAINT fk_products_category 
         FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL;
       `
 
-      // Create indexes
+      // Criar índices
       await sql`
         CREATE INDEX idx_products_sku ON products(sku);
         CREATE INDEX idx_products_category ON products(category_id);
@@ -113,12 +113,12 @@ export async function initializeDatabase() {
         CREATE INDEX idx_evaluation_scores_evaluation ON evaluation_scores(evaluation_id);
       `
 
-      console.log("Schema created successfully!")
+      console.log("Schema criado com sucesso!")
 
-      // Seed data
-      console.log("Seeding initial data...")
+      // Popular dados
+      console.log("Populando dados iniciais...")
 
-      // Seed employees
+      // Popular funcionários
       await sql`
         INSERT INTO employees (email, name, role, store_location, password_hash, is_active) VALUES
         ('operator@store.com', 'John Smith', 'operator', 'Store A', 'demo', true),
@@ -127,7 +127,7 @@ export async function initializeDatabase() {
         ('admin@store.com', 'Alice Brown', 'admin', 'Headquarters', 'demo', true);
       `
 
-      // Seed categories
+      // Popular categorias
       await sql`
         INSERT INTO categories (name, description) VALUES
         ('Electronics', 'Electronic devices and gadgets'),
@@ -143,7 +143,7 @@ export async function initializeDatabase() {
         ON CONFLICT DO NOTHING;
       `
 
-      // Seed criteria for each category
+      // Popular critérios para cada categoria
       await sql`
         INSERT INTO criteria (category_id, name, weight, max_score)
         SELECT id, 'Build Quality', 1.0, 10 FROM categories WHERE name = 'Electronics'
@@ -170,7 +170,7 @@ export async function initializeDatabase() {
         UNION ALL SELECT id, 'Safety', 1.3, 10 FROM categories WHERE name = 'Toys & Games';
       `
 
-      // Seed products
+      // Popular produtos
       await sql`
         INSERT INTO products (sku, name, category_id, barcode, description) VALUES
         ('ELEC-001', 'Wireless Headphones', 1, '123456789012', 'Premium noise-cancelling headphones'),
@@ -183,14 +183,14 @@ export async function initializeDatabase() {
         ('GARDEN-002', 'Garden Gloves', 3, '123456789019', 'Durable waterproof garden gloves');
       `
 
-      console.log("Database initialized successfully!")
+      console.log("Banco de dados inicializado com sucesso!")
     } else {
-      console.log("Database schema already exists.")
+      console.log("Schema do banco de dados já existe.")
     }
 
     isInitialized = true
   } catch (error) {
-    console.error("Database initialization error:", error)
+    console.error("Erro ao inicializar banco de dados:", error)
     throw error
   }
 }

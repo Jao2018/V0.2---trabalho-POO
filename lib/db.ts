@@ -3,12 +3,12 @@ import { Pool } from "pg"
 let pool: Pool | null = null
 let isInitialized = false
 
-// Initialize database connection only when needed
+// Inicializar conexão com banco de dados apenas quando necessário
 async function initializeDatabase() {
   if (!pool) {
     const databaseUrl = process.env.DATABASE_URL
     if (!databaseUrl) {
-      throw new Error("DATABASE_URL environment variable is not set")
+      throw new Error("DATABASE_URL variável de ambiente não está definida")
     }
 
     pool = new Pool({
@@ -26,9 +26,9 @@ async function initializeDatabase() {
 
 async function ensureSchema() {
   try {
-    console.log("Checking database schema...")
+    console.log("Verificando schema do banco de dados...")
 
-    // Check if tables exist
+    // Verificar se as tabelas existem
     const result = await pool!.query(`
       SELECT EXISTS (
         SELECT FROM information_schema.tables 
@@ -40,9 +40,9 @@ async function ensureSchema() {
     const tablesExist = result.rows[0]?.exists
 
     if (!tablesExist) {
-      console.log("Tables do not exist. Creating schema...")
+      console.log("Tabelas não existem. Criando schema...")
 
-      // Create categories table first (referenced by others)
+      // Criar tabela categories primeiro (referenciada por outras)
       await pool!.query(`
         CREATE TABLE categories (
           id SERIAL PRIMARY KEY,
@@ -53,7 +53,7 @@ async function ensureSchema() {
         );
       `)
 
-      // Create employees table
+      // Criar tabela employees
       await pool!.query(`
         CREATE TABLE employees (
           id SERIAL PRIMARY KEY,
@@ -68,7 +68,7 @@ async function ensureSchema() {
         );
       `)
 
-      // Create products table
+      // Criar tabela products
       await pool!.query(`
         CREATE TABLE products (
           id SERIAL PRIMARY KEY,
@@ -85,7 +85,7 @@ async function ensureSchema() {
         );
       `)
 
-      // Create criteria table
+      // Criar tabela criteria
       await pool!.query(`
         CREATE TABLE criteria (
           id SERIAL PRIMARY KEY,
@@ -98,7 +98,7 @@ async function ensureSchema() {
         );
       `)
 
-      // Create evaluations table
+      // Criar tabela evaluations
       await pool!.query(`
         CREATE TABLE evaluations (
           id SERIAL PRIMARY KEY,
@@ -114,7 +114,7 @@ async function ensureSchema() {
         );
       `)
 
-      // Create evaluation_scores table
+      // Criar tabela evaluation_scores
       await pool!.query(`
         CREATE TABLE evaluation_scores (
           id SERIAL PRIMARY KEY,
@@ -126,7 +126,7 @@ async function ensureSchema() {
         );
       `)
 
-      // Create indexes for performance
+      // Criar índices para performance
       await pool!.query(`CREATE INDEX idx_products_sku ON products(sku)`)
       await pool!.query(`CREATE INDEX idx_products_category ON products(category_id)`)
       await pool!.query(`CREATE INDEX idx_evaluations_product ON evaluations(product_id)`)
@@ -134,12 +134,12 @@ async function ensureSchema() {
       await pool!.query(`CREATE INDEX idx_evaluations_date ON evaluations(evaluation_date)`)
       await pool!.query(`CREATE INDEX idx_evaluation_scores_evaluation ON evaluation_scores(evaluation_id)`)
 
-      console.log("Schema created successfully!")
+      console.log("Schema criado com sucesso!")
 
-      // Seed initial data
-      console.log("Seeding initial data...")
+      // Popular dados iniciais
+      console.log("Populando dados iniciais...")
 
-      // Seed categories
+      // Popular categorias
       await pool!.query(`
         INSERT INTO categories (name, description) VALUES
         ('Electronics', 'Electronic devices and gadgets'),
@@ -154,7 +154,7 @@ async function ensureSchema() {
         ('Miscellaneous', 'Other products')
       `)
 
-      // Seed employees
+      // Popular funcionários
       await pool!.query(`
         INSERT INTO employees (email, name, role, store_location, password_hash, is_active) VALUES
         ('operator@store.com', 'John Smith', 'operator', 'Store A', 'demo', true),
@@ -163,7 +163,7 @@ async function ensureSchema() {
         ('admin@store.com', 'Alice Brown', 'admin', 'Headquarters', 'demo', true)
       `)
 
-      // Seed criteria for each category
+      // Popular critérios para cada categoria
       await pool!.query(`
         INSERT INTO criteria (category_id, name, weight, max_score)
         SELECT id, 'Build Quality', 1.0, 10 FROM categories WHERE name = 'Electronics'
@@ -178,7 +178,7 @@ async function ensureSchema() {
         UNION ALL SELECT id, 'Functionality', 1.2, 10 FROM categories WHERE name = 'Home & Garden'
         UNION ALL SELECT id, 'Aesthetics', 0.8, 10 FROM categories WHERE name = 'Home & Garden'
         UNION ALL SELECT id, 'Performance', 1.3, 10 FROM categories WHERE name = 'Sports & Outdoors'
-        UNION ALL SELECT id, 'Comfort', 0.9, 10 FROM categories WHERE name = 'Sports & Outdoors'
+        UNION ALL SELECT id, 'Comfort', 1.3, 10 FROM categories WHERE name = 'Sports & Outdoors'
         UNION ALL SELECT id, 'Content Quality', 1.5, 10 FROM categories WHERE name = 'Books & Media'
         UNION ALL SELECT id, 'Presentation', 0.7, 10 FROM categories WHERE name = 'Books & Media'
         UNION ALL SELECT id, 'Taste', 1.5, 10 FROM categories WHERE name = 'Food & Beverages'
@@ -190,7 +190,7 @@ async function ensureSchema() {
         UNION ALL SELECT id, 'Safety', 1.3, 10 FROM categories WHERE name = 'Toys & Games'
       `)
 
-      // Seed products
+      // Popular produtos
       await pool!.query(`
         INSERT INTO products (sku, name, category_id, barcode, description) VALUES
         ('ELEC-001', 'Wireless Headphones', 1, '123456789012', 'Premium noise-cancelling headphones'),
@@ -203,26 +203,26 @@ async function ensureSchema() {
         ('GARDEN-002', 'Garden Gloves', 3, '123456789019', 'Durable waterproof garden gloves')
       `)
 
-      console.log("Database initialized successfully!")
+      console.log("Banco de dados inicializado com sucesso!")
     } else {
-      console.log("Database schema already exists.")
+      console.log("Schema do banco de dados já existe.")
     }
   } catch (error) {
-    console.error("Database initialization error:", error)
+    console.error("Erro ao inicializar banco de dados:", error)
     throw error
   }
 }
 
 export { initializeDatabase, pool as getPool }
 
-// Helper function for querying with parameterized queries
+// Função auxiliar para queries com consultas parametrizadas
 export async function query<T>(text: string, values?: (string | number | boolean | null)[]): Promise<T[]> {
   try {
     const poolClient = await initializeDatabase()
     const result = await poolClient.query(text, values || [])
     return result.rows as T[]
   } catch (error) {
-    console.error("Database error:", error)
+    console.error("Erro no banco de dados:", error)
     throw error
   }
 }

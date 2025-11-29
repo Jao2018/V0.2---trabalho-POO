@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     const token = getToken(request)
     const user = await verifyToken(token || "")
 
-    // Allow managers, evaluators, and admin to create categories
+    // Permitir managers, evaluators e admin a criar categorias
     if (!user || !["manager", "evaluator", "admin"].includes(user.role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
     }

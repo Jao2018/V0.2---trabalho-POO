@@ -3,11 +3,11 @@ import { query } from "@/lib/db"
 import { verifyToken } from "@/lib/auth"
 
 function getToken(request: NextRequest): string | undefined {
-  // Try cookie first
+  // Tentar cookie primeiro
   const cookieToken = request.cookies.get("auth_token")?.value
   if (cookieToken) return cookieToken
 
-  // Try Authorization header
+  // Tentar header Authorization
   const authHeader = request.headers.get("authorization")
   if (authHeader?.startsWith("Bearer ")) {
     return authHeader.substring(7)
