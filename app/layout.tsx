@@ -15,7 +15,6 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Product Classification PWA",
   description: "Employee evaluation and product classification system",
-  generator: "v0.app",
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -34,6 +33,7 @@ export const metadata: Metadata = {
     ],
     apple: "/apple-icon.png",
   },
+    generator: 'v0.app'
 }
 
 export const viewport: Viewport = {

@@ -35,13 +35,13 @@ export default function Reports() {
     queryFn: () => base44.entities.Evaluation.list(),
   })
 
-  // Calculate metrics
+  // Calcular métricas
   const averageScore =
     evaluations.length > 0 ? evaluations.reduce((sum, e) => sum + e.overall_score, 0) / evaluations.length : 0
 
   const uniqueEvaluators = new Set(evaluations.map((e) => e.employee_email)).size
 
-  // Top products by score
+  // Melhores produtos por pontuação
   const productScores = products
     .map((product) => {
       const productEvals = evaluations.filter((e) => e.product_id === product.id)
@@ -57,7 +57,7 @@ export default function Reports() {
     .sort((a, b) => b.score - a.score)
     .slice(0, 10)
 
-  // Evaluations by category
+  // Avaliações por categoria
   const categoryData = categories
     .map((category) => {
       const categoryProducts = products.filter((p) => p.category_id === category.id)
@@ -75,7 +75,7 @@ export default function Reports() {
     })
     .filter((c) => c.count > 0)
 
-  // Score distribution
+  // Distribuição de pontuação
   const scoreDistribution = [
     { range: "0-1", count: evaluations.filter((e) => e.overall_score < 1).length },
     { range: "1-2", count: evaluations.filter((e) => e.overall_score >= 1 && e.overall_score < 2).length },
@@ -90,16 +90,16 @@ export default function Reports() {
     <div className="space-y-8">
       {/* Header */}
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <h1 className="text-3xl font-bold text-slate-900">Reports & Analytics</h1>
-        <p className="text-slate-600 mt-1">Performance insights and statistics</p>
+        <h1 className="text-3xl font-bold text-slate-900">Relatórios & Análises</h1>
+        <p className="text-slate-600 mt-1">Insights e estatísticas de desempenho</p>
       </div>
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Total Products" value={products.length} icon={Package} color="cyan" />
-        <StatCard title="Total Evaluations" value={evaluations.length} icon={TrendingUp} color="emerald" />
-        <StatCard title="Average Score" value={averageScore.toFixed(2)} icon={Star} color="amber" />
-        <StatCard title="Active Evaluators" value={uniqueEvaluators} icon={Users} color="slate" />
+        <StatCard title="Total de Produtos" value={products.length} icon={Package} color="cyan" />
+        <StatCard title="Total de Avaliações" value={evaluations.length} icon={TrendingUp} color="emerald" />
+        <StatCard title="Pontuação Média" value={averageScore.toFixed(2)} icon={Star} color="amber" />
+        <StatCard title="Avaliadores Ativos" value={uniqueEvaluators} icon={Users} color="slate" />
       </div>
 
       {/* Charts */}
@@ -107,7 +107,7 @@ export default function Reports() {
         {/* Top Products */}
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 delay-100">
           <Card className="p-6 border border-slate-200">
-            <h2 className="text-lg font-bold text-slate-900 mb-4">Top Products by Score</h2>
+            <h2 className="text-lg font-bold text-slate-900 mb-4">Melhores Produtos por Pontuação</h2>
             {productScores.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={productScores}>
@@ -119,7 +119,7 @@ export default function Reports() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-[300px] flex items-center justify-center text-slate-500">No data available</div>
+              <div className="h-[300px] flex items-center justify-center text-slate-500">Nenhum dado disponível</div>
             )}
           </Card>
         </div>
@@ -127,7 +127,7 @@ export default function Reports() {
         {/* Score Distribution */}
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 delay-200">
           <Card className="p-6 border border-slate-200">
-            <h2 className="text-lg font-bold text-slate-900 mb-4">Score Distribution</h2>
+            <h2 className="text-lg font-bold text-slate-900 mb-4">Distribuição de Pontuação</h2>
             {evaluations.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
@@ -149,7 +149,7 @@ export default function Reports() {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-[300px] flex items-center justify-center text-slate-500">No data available</div>
+              <div className="h-[300px] flex items-center justify-center text-slate-500">Nenhum dado disponível</div>
             )}
           </Card>
         </div>
@@ -157,7 +157,7 @@ export default function Reports() {
         {/* Evaluations by Category */}
         <div className="lg:col-span-2 animate-in fade-in slide-in-from-bottom-4 duration-300 delay-300">
           <Card className="p-6 border border-slate-200">
-            <h2 className="text-lg font-bold text-slate-900 mb-4">Performance by Category</h2>
+            <h2 className="text-lg font-bold text-slate-900 mb-4">Desempenho por Categoria</h2>
             {categoryData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={categoryData}>
@@ -167,12 +167,12 @@ export default function Reports() {
                   <YAxis yAxisId="right" orientation="right" stroke="#10b981" domain={[0, 5]} />
                   <Tooltip />
                   <Legend />
-                  <Bar yAxisId="left" dataKey="count" fill="#06b6d4" name="Evaluations" radius={[8, 8, 0, 0]} />
-                  <Bar yAxisId="right" dataKey="avgScore" fill="#10b981" name="Avg Score" radius={[8, 8, 0, 0]} />
+                  <Bar yAxisId="left" dataKey="count" fill="#06b6d4" name="Avaliações" radius={[8, 8, 0, 0]} />
+                  <Bar yAxisId="right" dataKey="avgScore" fill="#10b981" name="Pontuação Média" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-[300px] flex items-center justify-center text-slate-500">No data available</div>
+              <div className="h-[300px] flex items-center justify-center text-slate-500">Nenhum dado disponível</div>
             )}
           </Card>
         </div>

@@ -1,18 +1,18 @@
 /**
- * Creates a page URL for React Router navigation
- * Converts page names to route paths
+ * Cria uma URL de página para navegação React Router
+ * Converte nomes de páginas para caminhos de rota
  */
 export function createPageUrl(pageName: string): string {
   if (!pageName) return "/"
 
-  // Handle query parameters
+  // Lidar com parâmetros de consulta
   if (pageName.includes("?")) {
     const [page, query] = pageName.split("?")
     const encodedQuery = new URLSearchParams(query).toString()
     return `/${page.toLowerCase()}?${encodedQuery}`
   }
 
-  // Map page names to routes
+  // Mapear nomes de páginas para rotas
   const pageRoutes: Record<string, string> = {
     Home: "/home",
     Products: "/products",
@@ -26,7 +26,7 @@ export function createPageUrl(pageName: string): string {
 }
 
 /**
- * Parse query parameters from URL
+ * Analisar parâmetros de consulta da URL
  */
 export function getQueryParams(): Record<string, string> {
   if (typeof window === "undefined") return {}
@@ -42,7 +42,7 @@ export function getQueryParams(): Record<string, string> {
 }
 
 /**
- * Get a specific query parameter value
+ * Obter um valor específico de parâmetro de consulta
  */
 export function getQueryParam(key: string): string | null {
   if (typeof window === "undefined") return null

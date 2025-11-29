@@ -44,7 +44,6 @@ export default function Evaluations() {
   const { data: evaluations = [], isLoading } = useQuery({
     queryKey: ["evaluations"],
     queryFn: async () => {
-      console.log("[v0] Fetching evaluations...")
       const res = await fetch("/api/evaluations", {
         credentials: "include",
         headers: getAuthHeaders(),
@@ -57,25 +56,21 @@ export default function Evaluations() {
   const { data: products = [] } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
-      console.log("[v0] Fetching products for evaluation dropdown...")
       const res = await fetch("/api/products", {
         credentials: "include",
         headers: getAuthHeaders(),
       })
-      console.log("[v0] Products fetch response status:", res.status)
       if (!res.ok) {
         const error = await res.text()
-        console.log("[v0] Products fetch error:", error)
         throw new Error(`Failed to fetch products: ${res.status}`)
       }
       const data = await res.json()
-      console.log("[v0] Products fetched:", data.length, data)
       return data
     },
     retry: 5,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 10, // 10 minutes (formerly cacheTime)
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
   })
 
   const { data: evaluationScores = [] } = useQuery({
@@ -105,19 +100,15 @@ export default function Evaluations() {
   const { data: allCriteria = [] } = useQuery({
     queryKey: ["criteria"],
     queryFn: async () => {
-      console.log("[v0] Fetching criteria...")
       const res = await fetch("/api/criteria", {
         credentials: "include",
         headers: getAuthHeaders(),
       })
-      console.log("[v0] Criteria fetch response status:", res.status)
       if (!res.ok) {
         const error = await res.text()
-        console.log("[v0] Criteria fetch error:", error)
         throw new Error(`Failed to fetch criteria: ${res.status}`)
       }
       const data = await res.json()
-      console.log("[v0] Criteria fetched:", data.length, data)
       return data
     },
     retry: 5,
@@ -305,7 +296,6 @@ export default function Evaluations() {
                   <Select
                     value={newEvaluation.product_id}
                     onValueChange={(value) => {
-                      console.log("[v0] Product selected:", value)
                       setNewEvaluation({
                         ...newEvaluation,
                         product_id: value,

@@ -18,7 +18,7 @@ export default function Settings() {
   const queryClient = useQueryClient()
   const { user } = useAuth()
 
-  // Category state
+  // Estado das categorias
   const [newCategory, setNewCategory] = useState({ name: "", description: "", color: "blue" })
   const [editingCategoryId, setEditingCategoryId] = useState<number | null>(null)
   const [editingCategory, setEditingCategory] = useState({ name: "", description: "", color: "blue" })

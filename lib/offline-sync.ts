@@ -1,4 +1,4 @@
-// Sync manager for offline evaluations
+// Gerenciador de sincronização para avaliações offline
 import { getPendingEvaluations, markEvaluationSynced } from "./offline-db"
 
 export class OfflineSyncManager {
@@ -29,7 +29,7 @@ export class OfflineSyncManager {
             await markEvaluationSynced(evaluation.id)
           }
         } catch (error) {
-          console.error("Failed to sync evaluation:", error)
+          console.error("Falha ao sincronizar avaliação:", error)
         }
       }
     } finally {

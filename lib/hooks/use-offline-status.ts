@@ -7,7 +7,7 @@ export function useOfflineStatus() {
   const [hasPendingSync, setHasPendingSync] = useState(false)
 
   useEffect(() => {
-    // Check initial status
+    // Verificar status inicial
     setIsOnline(navigator.onLine)
 
     const handleOnline = () => setIsOnline(true)

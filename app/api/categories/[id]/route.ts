@@ -33,8 +33,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     const categories = await query<Category>(
-      "UPDATE categories SET name = $1, description = $2 WHERE id = $3 RETURNING *",
-      [name, description || null, id],
+      "UPDATE categories SET name = $1, description = $2, color = $3 WHERE id = $4 RETURNING *",
+      [name, description || null, color || null, id],
     )
 
     if (categories.length === 0) {
@@ -43,7 +43,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json(categories[0])
   } catch (error) {
-    console.error("[v0] Error updating category:", error)
+    console.error("Erro ao atualizar categoria:", error)
     return NextResponse.json({ error: "Failed to update category" }, { status: 500 })
   }
 }
@@ -61,7 +61,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     await query("DELETE FROM categories WHERE id = $1", [id])
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("[v0] Error deleting category:", error)
+    console.error("Erro ao deletar categoria:", error)
     return NextResponse.json({ error: "Failed to delete category" }, { status: 500 })
   }
 }

@@ -7,7 +7,7 @@ export default function Page() {
   const router = useRouter()
 
   useEffect(() => {
-    // Redirect to login or home based on auth
+    // Redireciona para login ou home baseado na autenticação
     router.push("/login")
   }, [router])
 

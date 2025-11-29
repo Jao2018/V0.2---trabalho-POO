@@ -1,5 +1,5 @@
-// Base44 API Client for Product Classification PWA
-// This is a mock implementation - replace with actual Base44 SDK when available
+// Cliente API Base44 para Product Classification PWA
+// Esta é uma implementação mock - substituir com o SDK Base44 real quando disponível
 
 interface AuthResponse {
   user: {
@@ -40,7 +40,7 @@ class Base44Client {
 
   auth = {
     login: async (email: string, password: string): Promise<AuthResponse> => {
-      // Mock implementation - replace with actual API call
+      // Implementação mock - substituir com chamada API real
       const response = await fetch(`${this.apiUrl}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -75,5 +75,5 @@ class Base44Client {
   }
 }
 
-// Export singleton instance
+// Exportar instância singleton
 export const base44 = new Base44Client()

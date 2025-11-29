@@ -4,13 +4,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { useState, type ReactNode } from "react"
 
 export function QueryProvider({ children }: { children: ReactNode }) {
-  // Create a client instance per component mount to avoid sharing state between users
+  // Criar uma instância de cliente por montagem de componente para evitar compartilhamento de estado entre usuários
   const [queryClient] = useState(
     () =>
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 60 * 1000, // 1 minute
+            staleTime: 60 * 1000, // 1 minuto
             refetchOnWindowFocus: false,
           },
         },

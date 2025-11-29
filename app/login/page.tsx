@@ -31,12 +31,10 @@ export default function LoginPage() {
     }
 
     try {
-      console.log("[v0] Calling login function...")
       await login(formData.email, formData.password)
-      console.log("[v0] Login successful")
     } catch (err) {
       const message = err instanceof Error ? err.message : "Login failed"
-      console.error("[v0] Login error:", message, err)
+      console.error("Erro no login:", message, err)
       setError(message)
       toast.error(message)
     }
