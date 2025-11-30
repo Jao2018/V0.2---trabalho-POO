@@ -7,6 +7,7 @@ A Progressive Web App for product evaluation and classification with offline sup
 ### Prerequisites
 - Node.js 18+ installed
 - Docker and Docker Compose installed
+- **Eclipse IDE** (opcional - veja instruções abaixo)
 
 ### Setup Instructions
 
@@ -35,6 +36,61 @@ A Progressive Web App for product evaluation and classification with offline sup
 
 5. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
+
+### Configuração no Eclipse IDE
+
+Este projeto pode ser importado e executado no Eclipse IDE:
+
+#### Instalando Plugins Necessários
+
+1. Abra o Eclipse
+2. Vá em **Help** > **Eclipse Marketplace**
+3. Instale os seguintes plugins:
+   - **Wild Web Developer** (suporte para JavaScript, TypeScript, HTML, CSS)
+   - **Docker Tooling** (opcional, para gerenciar containers do Eclipse)
+
+#### Importando o Projeto
+
+1. No Eclipse, vá em **File** > **Import**
+2. Selecione **General** > **Existing Projects into Workspace**
+3. Clique em **Next**
+4. Em **Select root directory**, navegue até a pasta do projeto
+5. Marque o projeto na lista e clique em **Finish**
+
+#### Executando o Projeto no Eclipse
+
+**Opção 1: Usando External Tools (Recomendado)**
+
+1. Vá em **Run** > **External Tools** > **External Tools Configurations...**
+2. Clique com botão direito em **Program** e selecione **New Configuration**
+3. Configure:
+   - **Name:** `npm run dev`
+   - **Location:** `/usr/local/bin/npm` (Linux/Mac) ou `C:\Program Files\nodejs\npm.cmd` (Windows)
+   - **Working Directory:** `${project_loc}`
+   - **Arguments:** `run dev`
+4. Clique em **Apply** e depois **Run**
+
+Repita o processo para criar configurações para:
+- `docker-compose up` (para iniciar o banco de dados)
+- `docker-compose down` (para parar o banco de dados)
+
+**Opção 2: Usando Terminal Integrado**
+
+1. Vá em **Window** > **Show View** > **Terminal**
+2. Clique no ícone de novo terminal
+3. Execute os comandos normalmente:
+   \`\`\`bash
+   docker-compose up -d
+   npm install
+   npm run dev
+   \`\`\`
+
+#### Dicas para Eclipse
+
+- Use **Ctrl+Shift+R** para busca rápida de arquivos
+- Use **Ctrl+H** para buscar no projeto
+- Configure formatadores automáticos em **Preferences** > **JavaScript** > **Code Style**
+- O arquivo `.project` está incluído no repositório para facilitar a importação
 
 ### Environment Variables
 
