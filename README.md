@@ -14,7 +14,7 @@ A Progressive Web App for product evaluation and classification with offline sup
 1. **Clone the repository**
    \`\`\`bash
    git clone <your-repo-url>
-   cd V0.2---trabalho-POO
+   cd product-classification-pwa
    \`\`\`
 
 2. **Start the local database**

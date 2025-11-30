@@ -14,7 +14,7 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Product Classification PWA",
-  description: "Employee evaluation and product classification system",
+  description: "Sistema de classificação e avaliação de produtos para funcionários",
   manifest: "/manifest.json",
   icons: {
     icon: [

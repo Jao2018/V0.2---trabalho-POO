@@ -227,11 +227,6 @@ export default function Evaluations() {
     ? allCriteria.filter((c: any) => c.category_id === selectedProduct.category_id)
     : []
 
-  console.log("[v0] Selected product:", selectedProduct)
-  console.log("[v0] Selected product category_id:", selectedProduct?.category_id)
-  console.log("[v0] All criteria:", allCriteria)
-  console.log("[v0] Relevant criteria for selected product:", relevantCriteria)
-
   const handleScoreChange = (criteriaId: number, score: number) => {
     setNewEvaluation({
       ...newEvaluation,

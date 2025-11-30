@@ -23,8 +23,6 @@ export default function LoginPage() {
     e.preventDefault()
     setError("")
 
-    console.log("[v0] Login form submitted with email:", formData.email)
-
     if (!formData.email || !formData.password) {
       setError("Please fill in all fields")
       return
